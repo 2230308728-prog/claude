@@ -1,0 +1,13 @@
+<!--components/empty/empty.wxml-->
+<view class="empty">
+  <view class="icon-wrapper" wx:if="{{icon}}">
+    <image class="icon-image" src="{{icon}}" mode="aspectFit"></image>
+  </view>
+  <view class="icon-emoji" wx:elif="{{emoji}}">{{emoji}}</view>
+  <view class="icon-default" wx:else>📦</view>
+
+  <text class="title" wx:if="{{title}}">{{title}}</text>
+  <text class="description" wx:if="{{description}}">{{description}}</text>
+
+  <slot></slot>
+</view>

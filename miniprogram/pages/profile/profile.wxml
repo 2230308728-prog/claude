@@ -1,0 +1,95 @@
+<!--pages/profile/profile.wxml-->
+<view class="container">
+  <!-- 用户信息卡片 -->
+  <view class="user-card">
+    <view class="user-info" wx:if="{{userInfo}}">
+      <image class="user-avatar" src="{{userInfo.avatarUrl || '/images/default_avatar.png'}}" mode="aspectFill"></image>
+      <view class="user-detail">
+        <text class="user-name">{{userInfo.nickname || '未设置昵称'}}</text>
+        <text class="user-phone" wx:if="{{userInfo.phone}}">{{userInfo.phone}}</text>
+        <text class="user-phone" wx:else>未绑定手机</text>
+      </view>
+    </view>
+    <view class="user-info" wx:else>
+      <image class="user-avatar" src="/images/default_avatar.png" mode="aspectFill"></image>
+      <view class="user-detail">
+        <text class="user-name">未登录</text>
+        <button class="btn-login" bindtap="handleLogin">立即登录</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 订单快捷入口 -->
+  <view class="order-entrance" wx:if="{{userInfo}}">
+    <view class="entrance-header">
+      <text class="entrance-title">我的订单</text>
+      <view class="entrance-more" bindtap="goToOrders">
+        <text>全部订单</text>
+        <text class="icon">›</text>
+      </view>
+    </view>
+    <view class="entrance-list">
+      <view class="entrance-item" bindtap="goToOrders" data-status="PENDING">
+        <image class="entrance-icon" src="/images/icon_order_pending.png" mode="aspectFit"></image>
+        <text class="entrance-text">待支付</text>
+        <text class="entrance-badge" wx:if="{{orderCount.pending > 0}}">{{orderCount.pending}}</text>
+      </view>
+      <view class="entrance-item" bindtap="goToOrders" data-status="PAID">
+        <image class="entrance-icon" src="/images/icon_order_paid.png" mode="aspectFit"></image>
+        <text class="entrance-text">已支付</text>
+        <text class="entrance-badge" wx:if="{{orderCount.paid > 0}}">{{orderCount.paid}}</text>
+      </view>
+      <view class="entrance-item" bindtap="goToOrders" data-status="COMPLETED">
+        <image class="entrance-icon" src="/images/icon_order_completed.png" mode="aspectFit"></image>
+        <text class="entrance-text">已完成</text>
+      </view>
+      <view class="entrance-item" bindtap="goToOrders" data-status="REFUNDED">
+        <image class="entrance-icon" src="/images/icon_order_refund.png" mode="aspectFit"></image>
+        <text class="entrance-text">退款/售后</text>
+        <text class="entrance-badge" wx:if="{{orderCount.refund > 0}}">{{orderCount.refund}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-list" wx:if="{{userInfo}}">
+    <view class="menu-item" bindtap="goToFavorites">
+      <view class="menu-left">
+        <image class="menu-icon" src="/images/icon_favorite.png" mode="aspectFit"></image>
+        <text class="menu-text">我的收藏</text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goToAddress">
+      <view class="menu-left">
+        <image class="menu-icon" src="/images/icon_address.png" mode="aspectFit"></image>
+        <text class="menu-text">收货地址</text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="contactService">
+      <view class="menu-left">
+        <image class="menu-icon" src="/images/icon_service.png" mode="aspectFit"></image>
+        <text class="menu-text">联系客服</text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="showAbout">
+      <view class="menu-left">
+        <image class="menu-icon" src="/images/icon_about.png" mode="aspectFit"></image>
+        <text class="menu-text">关于我们</text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 退出登录 -->
+  <view class="logout-section" wx:if="{{userInfo}}">
+    <button class="btn-logout" bindtap="handleLogout">退出登录</button>
+  </view>
+
+  <!-- 版本信息 -->
+  <view class="version-info">
+    <text>bmad研学商城 v1.0.0</text>
+  </view>
+</view>

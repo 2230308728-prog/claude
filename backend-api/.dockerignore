@@ -1,0 +1,54 @@
+# Node.js
+node_modules
+npm-debug.log
+package-lock.json
+
+# 构建产物
+dist
+*.tsbuildinfo
+
+# 测试
+coverage
+.nyc_output
+*.spec.ts
+test
+
+# Git
+.git
+.gitignore
+.github
+
+# 编辑器
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# 环境变量
+.env
+.env.*
+!.env.example
+
+# 日志
+logs
+*.log
+
+# 临时文件
+tmp
+temp
+.DS_Store
+
+# 文档
+README.md
+docs
+*.md
+
+# CI/CD
+.gitlab-ci.yml
+.travis.yml
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml

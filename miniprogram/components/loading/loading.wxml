@@ -1,0 +1,7 @@
+<!--components/loading/loading.wxml-->
+<view class="loading {{type}}">
+  <view class="spinner">
+    <view class="dot" wx:for="{{[1,2,3]}}" wx:key="index"></view>
+  </view>
+  <text class="text" wx:if="{{text}}">{{text}}</text>
+</view>

@@ -1,0 +1,19 @@
+{
+  "name": "bmad-miniprogram",
+  "version": "1.0.0",
+  "description": "bmad研学商城小程序",
+  "main": "app.js",
+  "scripts": {
+    "dev": "echo '请使用微信开发者工具打开项目'",
+    "build": "echo '请使用微信开发者工具进行构建'"
+  },
+  "keywords": [
+    "miniprogram",
+    "wechat",
+    "education",
+    "travel"
+  ],
+  "author": "bmad team",
+  "license": "UNLICENSED",
+  "dependencies": {}
+}

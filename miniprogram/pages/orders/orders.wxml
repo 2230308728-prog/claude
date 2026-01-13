@@ -1,0 +1,127 @@
+<!--pages/orders/orders.wxml-->
+<view class="container">
+  <!-- 订单状态标签 -->
+  <view class="status-tabs">
+    <view
+      class="tab-item {{currentTab === '' ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-status=""
+    >
+      全部
+    </view>
+    <view
+      class="tab-item {{currentTab === 'PENDING' ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-status="PENDING"
+    >
+      待支付
+    </view>
+    <view
+      class="tab-item {{currentTab === 'PAID' ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-status="PAID"
+    >
+      已支付
+    </view>
+    <view
+      class="tab-item {{currentTab === 'COMPLETED' ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-status="COMPLETED"
+    >
+      已完成
+    </view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="order-list" wx:if="{{orders.length > 0}}">
+    <view
+      class="order-item"
+      wx:for="{{orders}}"
+      wx:key="id"
+      bindtap="goToOrder"
+      data-id="{{item.id}}"
+    >
+      <!-- 订单头部 -->
+      <view class="order-header">
+        <text class="order-no">订单号：{{item.orderNo}}</text>
+        <text class="order-status status-{{item.status}}">{{item.statusText}}</text>
+      </view>
+
+      <!-- 产品信息 -->
+      <view class="order-product">
+        <image class="product-image" src="{{item.product.coverImage}}" mode="aspectFill"></image>
+        <view class="product-info">
+          <text class="product-title">{{item.product.title}}</text>
+          <view class="product-meta">
+            <text class="product-date" wx:if="{{item.travelDate}}">
+              出行日期：{{item.travelDate}}
+            </text>
+          </view>
+          <view class="product-participant">
+            <text>参与人：{{item.participantName}}</text>
+            <text class="age">（{{item.participantAge}}岁）</text>
+          </view>
+        </view>
+        <view class="product-price">
+          <text class="price">¥{{item.totalAmount}}</text>
+        </view>
+      </view>
+
+      <!-- 订单底部 -->
+      <view class="order-footer">
+        <text class="order-time">{{item.createdAt}}</text>
+        <view class="order-actions">
+          <button
+            class="btn-action btn-cancel"
+            wx:if="{{item.status === 'PENDING'}}"
+            catchtap="cancelOrder"
+            data-id="{{item.id}}"
+          >
+            取消订单
+          </button>
+          <button
+            class="btn-action btn-pay"
+            wx:if="{{item.status === 'PENDING'}}"
+            catchtap="payOrder"
+            data-id="{{item.id}}"
+          >
+            去支付
+          </button>
+          <button
+            class="btn-action btn-confirm"
+            wx:if="{{item.status === 'COMPLETED'}}"
+            catchtap="confirmOrder"
+            data-id="{{item.id}}"
+          >
+            确认完成
+          </button>
+          <button
+            class="btn-action btn-detail"
+            catchtap="goToOrder"
+            data-id="{{item.id}}"
+          >
+            查看详情
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:else>
+    <text class="empty-icon">📋</text>
+    <text class="empty-text">暂无订单</text>
+    <button class="btn-go-shop" bindtap="goToShop">去逛逛</button>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{hasMore && orders.length > 0}}">
+    <text wx:if="{{!loading}}">上拉加载更多</text>
+    <text wx:else>加载中...</text>
+  </view>
+
+  <!-- 没有更多 -->
+  <view class="no-more" wx:if="{{!hasMore && orders.length > 0}}">
+    <text>没有更多了</text>
+  </view>
+</view>

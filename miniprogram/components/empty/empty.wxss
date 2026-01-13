@@ -1,0 +1,40 @@
+/* components/empty/empty.wxss */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 60rpx;
+}
+
+.icon-wrapper,
+.icon-emoji,
+.icon-default {
+  margin-bottom: 32rpx;
+}
+
+.icon-image {
+  width: 200rpx;
+  height: 200rpx;
+}
+
+.icon-emoji,
+.icon-default {
+  font-size: 120rpx;
+  opacity: 0.5;
+}
+
+.title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.description {
+  font-size: 28rpx;
+  color: #999;
+  text-align: center;
+  line-height: 1.5;
+}

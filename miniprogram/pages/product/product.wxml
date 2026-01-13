@@ -1,0 +1,122 @@
+<!--pages/product/product.wxml-->
+<view class="container" wx:if="{{product}}">
+  <!-- 产品图片 -->
+  <view class="product-images">
+    <swiper
+      indicator-dots="{{true}}"
+      autoplay="{{false}}"
+      circular="{{true}}"
+      bindchange="onImageChange"
+    >
+      <swiper-item wx:for="{{product.images}}" wx:key="index">
+        <image class="product-image" src="{{item}}" mode="aspectFill"></image>
+      </swiper-item>
+    </swiper>
+  </view>
+
+  <!-- 产品基本信息 -->
+  <view class="product-info">
+    <view class="product-header">
+      <text class="product-title">{{product.title}}</text>
+      <view class="product-tags">
+        <text class="tag tag-info" wx:if="{{product.category}}">{{product.category.name}}</text>
+        <text class="tag tag-primary" wx:if="{{product.stock > 0}}">有货</text>
+        <text class="tag tag-danger" wx:else>售罄</text>
+      </view>
+    </view>
+
+    <view class="product-price-row">
+      <text class="product-price">¥{{product.price}}</text>
+      <text class="original-price" wx:if="{{product.originalPrice && product.originalPrice > product.price}}">
+        ¥{{product.originalPrice}}
+      </text>
+      <text class="product-sales">已售{{product.salesCount || 0}}</text>
+    </view>
+
+    <view class="product-stock" wx:if="{{product.stock > 0}}">
+      <text>库存：{{product.stock}}</text>
+    </view>
+  </view>
+
+  <!-- 产品详情 -->
+  <view class="product-detail">
+    <view class="detail-header">
+      <text class="detail-title">产品详情</text>
+    </view>
+    <view class="detail-content">
+      <text class="detail-desc">{{product.description}}</text>
+
+      <!-- 详细信息 -->
+      <view class="detail-info">
+        <view class="info-row" wx:if="{{product.duration}}">
+          <text class="info-label">活动时长：</text>
+          <text class="info-value">{{product.duration}}</text>
+        </view>
+        <view class="info-row" wx:if="{{product.location}}">
+          <text class="info-label">活动地点：</text>
+          <text class="info-value">{{product.location}}</text>
+        </view>
+        <view class="info-row" wx:if="{{product.ageRange}}">
+          <text class="info-label">适合年龄：</text>
+          <text class="info-value">{{product.ageRange}}</text>
+        </view>
+        <view class="info-row" wx:if="{{product.difficulty}}">
+          <text class="info-label">难度等级：</text>
+          <text class="info-value">{{product.difficulty}}</text>
+        </view>
+      </view>
+
+      <!-- 行程安排 -->
+      <view class="itinerary" wx:if="{{product.itinerary && product.itinerary.length > 0}}">
+        <text class="section-title">行程安排</text>
+        <view class="itinerary-item" wx:for="{{product.itinerary}}" wx:key="index">
+          <view class="itinerary-time">{{item.time}}</view>
+          <view class="itinerary-content">{{item.content}}</view>
+        </view>
+      </view>
+
+      <!-- 费用说明 -->
+      <view class="cost-info" wx:if="{{product.costIncluded || product.costExcluded}}">
+        <text class="section-title">费用说明</text>
+        <view class="cost-item" wx:if="{{product.costIncluded}}">
+          <text class="cost-label">费用包含：</text>
+          <text class="cost-value">{{product.costIncluded}}</text>
+        </view>
+        <view class="cost-item" wx:if="{{product.costExcluded}}">
+          <text class="cost-label">费用不含：</text>
+          <text class="cost-value">{{product.costExcluded}}</text>
+        </view>
+      </view>
+
+      <!-- 注意事项 -->
+      <view class="notice" wx:if="{{product.notice}}">
+        <text class="section-title">注意事项</text>
+        <text class="notice-content">{{product.notice}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar">
+    <view class="bar-left">
+      <view class="action-item" bindtap="toggleFavorite">
+        <image class="action-icon" src="{{isFavorite ? '/images/icon_heart_active.png' : '/images/icon_heart.png'}}" mode="aspectFit"></image>
+        <text class="action-text">收藏</text>
+      </view>
+      <view class="action-item" bindtap="contactService">
+        <image class="action-icon" src="/images/icon_service.png" mode="aspectFit"></image>
+        <text class="action-text">客服</text>
+      </view>
+    </view>
+    <view class="bar-right">
+      <button class="btn-buy" disabled="{{product.stock === 0}}" bindtap="handleBuy">
+        {{product.stock > 0 ? '立即预订' : '已售罄'}}
+      </button>
+    </view>
+  </view>
+</view>
+
+<!-- 加载中 -->
+<view class="loading-container" wx:if="{{loading}}">
+  <text>加载中...</text>
+</view>

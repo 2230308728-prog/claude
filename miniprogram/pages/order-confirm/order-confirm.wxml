@@ -1,0 +1,180 @@
+<!--pages/order-confirm/order-confirm.wxml-->
+<view class="container" wx:if="{{product}}">
+  <!-- 产品信息卡片 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">产品信息</text>
+    </view>
+    <view class="product-info">
+      <image class="product-image" src="{{product.coverImage}}" mode="aspectFill"></image>
+      <view class="product-detail">
+        <text class="product-title">{{product.title}}</text>
+        <view class="product-meta">
+          <text class="product-price">¥{{product.price}}</text>
+          <text class="product-stock" wx:if="{{product.stock > 0}}">库存: {{product.stock}}</text>
+          <text class="product-stock out-of-stock" wx:else>暂时售罄</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 参与人信息 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">参与人信息</text>
+      <text class="required">*必填</text>
+    </view>
+    <view class="form-section">
+      <view class="form-item">
+        <text class="form-label">参与者姓名</text>
+        <input
+          class="form-input"
+          placeholder="请输入参与者姓名"
+          value="{{formData.participantName}}"
+          bindinput="onInputChange"
+          data-field="participantName"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">年龄</text>
+        <input
+          class="form-input"
+          type="number"
+          placeholder="请输入年龄"
+          value="{{formData.participantAge}}"
+          bindinput="onInputChange"
+          data-field="participantAge"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">联系电话</text>
+        <input
+          class="form-input"
+          type="number"
+          placeholder="请输入联系电话"
+          value="{{formData.contactPhone}}"
+          bindinput="onInputChange"
+          data-field="contactPhone"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">出行日期</text>
+        <picker
+          mode="date"
+          start="{{minDate}}"
+          value="{{formData.travelDate}}"
+          bindchange="onDateChange"
+        >
+          <view class="picker-view">
+            <text class="{{formData.travelDate ? '' : 'placeholder'}}">
+              {{formData.travelDate || '请选择出行日期'}}
+            </text>
+            <text class="arrow">›</text>
+          </view>
+        </picker>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联系人信息 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">联系人信息</text>
+      <text class="required">*必填</text>
+    </view>
+    <view class="form-section">
+      <view class="form-item">
+        <text class="form-label">联系人姓名</text>
+        <input
+          class="form-input"
+          placeholder="请输入联系人姓名"
+          value="{{formData.contactName}}"
+          bindinput="onInputChange"
+          data-field="contactName"
+        />
+      </view>
+      <view class="form-item">
+        <text class="form-label">联系人电话</text>
+        <input
+          class="form-input"
+          type="number"
+          placeholder="请输入联系人电话"
+          value="{{formData.contactPhone}}"
+          bindinput="onInputChange"
+          data-field="contactPhone"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 备注 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">备注信息</text>
+      <text class="optional">选填</text>
+    </view>
+    <view class="form-section">
+      <textarea
+        class="form-textarea"
+        placeholder="如有特殊需求请在此备注"
+        value="{{formData.remarks}}"
+        bindinput="onInputChange"
+        data-field="remarks"
+        maxlength="200"
+      />
+      <view class="textarea-counter">{{formData.remarks.length}}/200</view>
+    </view>
+  </view>
+
+  <!-- 费用明细 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">费用明细</text>
+    </view>
+    <view class="cost-detail">
+      <view class="cost-row">
+        <text class="cost-label">产品价格</text>
+        <text class="cost-value">¥{{product.price}}</text>
+      </view>
+      <view class="cost-row">
+        <text class="cost-label">数量</text>
+        <text class="cost-value">1份</text>
+      </view>
+      <view class="cost-row total">
+        <text class="cost-label">合计</text>
+        <text class="cost-value total-price">¥{{product.price}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 服务协议 -->
+  <view class="agreement">
+    <checkbox-group bindchange="onAgreementChange">
+      <label class="agreement-label">
+        <checkbox value="agreed" checked="{{agreed}}" color="#07c160" />
+        <text>我已阅读并同意</text>
+        <text class="link" bindtap="showServiceAgreement">《服务协议》</text>
+      </label>
+    </checkbox-group>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar">
+    <view class="price-info">
+      <text class="price-label">合计：</text>
+      <text class="price-value">¥{{product.price}}</text>
+    </view>
+    <button
+      class="btn-submit"
+      disabled="{{!agreed || submitting}}"
+      bindtap="handleSubmit"
+    >
+      {{submitting ? '提交中...' : '提交订单'}}
+    </button>
+  </view>
+</view>
+
+<!-- 加载中 -->
+<view class="loading-container" wx:if="{{loading}}">
+  <text>加载中...</text>
+</view>

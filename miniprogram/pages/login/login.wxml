@@ -1,0 +1,56 @@
+<!--pages/login/login.wxml-->
+<view class="container">
+  <!-- Logo 区域 -->
+  <view class="logo-section">
+    <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
+    <text class="app-name">bmad研学商城</text>
+    <text class="app-slogan">专业的研学旅行产品预订平台</text>
+  </view>
+
+  <!-- 登录说明 -->
+  <view class="login-tip">
+    <text>首次登录将自动创建账号</text>
+  </view>
+
+  <!-- 登录按钮 -->
+  <view class="login-actions">
+    <button
+      class="btn-login"
+      open-type="getUserInfo"
+      bindgetuserinfo="onGetUserInfo"
+      loading="{{loading}}"
+    >
+      <image class="btn-icon" src="/images/icon_wechat.png" mode="aspectFit"></image>
+      微信一键登录
+    </button>
+  </view>
+
+  <!-- 用户协议 -->
+  <view class="agreement">
+    <checkbox-group bindchange="onAgreementChange">
+      <label class="agreement-label">
+        <checkbox value="agreed" checked="{{agreed}}" color="#07c160" />
+        <text>我已阅读并同意</text>
+        <text class="link" bindtap="goToUserAgreement">《用户协议》</text>
+        <text>和</text>
+        <text class="link" bindtap="goToPrivacyPolicy">《隐私政策》</text>
+      </label>
+    </checkbox-group>
+  </view>
+
+  <!-- 功能说明 -->
+  <view class="features">
+    <view class="feature-item">
+      <image class="feature-icon" src="/images/icon_safe.png" mode="aspectFit"></image>
+      <text class="feature-text">安全可靠</text>
+    </view>
+    <view class="feature-item">
+      <image class="feature-icon" src="/images/icon_product.png" mode="aspectFit"></image>
+      <text class="feature-text">精选产品</text>
+    </view>
+    <view class="feature-item">
+      <image class="feature-icon" src="/images/icon_service.png" mode="aspectFit"></image>
+      <text class="feature-text">贴心服务</text>
+    </view>
+  </view>
+</view>

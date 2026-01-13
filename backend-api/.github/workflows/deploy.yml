@@ -1,0 +1,229 @@
+# bmad Backend CD Pipeline
+# 持续部署工作流：Docker 镜像构建与部署
+
+name: CD
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: '部署环境'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  REGISTRY: registry.cn-hangzhou.aliyuncs.com
+  IMAGE_NAME: bmad/backend-api
+
+jobs:
+  # 任务 1: 构建并推送 Docker 镜像
+  build-and-push:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 登录到阿里云容器镜像服务
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.ALIYUN_REGISTRY_USERNAME }}
+          password: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
+
+      - name: 提取 Docker 元数据
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: 构建并推送 Docker 镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=production
+
+  # 任务 2: 部署到 Staging 环境
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'staging'
+    environment:
+      name: staging
+      url: https://staging-api.bmad.com
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 部署到阿里云 ECS (Staging)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_SSH_HOST }}
+          username: ${{ secrets.STAGING_SSH_USERNAME }}
+          key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.STAGING_SSH_PORT || 22 }}
+          script_stop: true
+          script: |
+            echo "Deploying to Staging environment..."
+
+            # 拉取最新镜像
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+            # 停止旧容器
+            docker stop bmad-backend-staging || true
+            docker rm bmad-backend-staging || true
+
+            # 启动新容器
+            docker run -d \
+              --name bmad-backend-staging \
+              --restart unless-stopped \
+              -p 3000:3000 \
+              --env-file /opt/bmad/staging/.env \
+              --network bmad-network \
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+            # 清理旧镜像
+            docker image prune -af --filter "until=24h"
+
+            echo "Deployment to Staging completed!"
+
+      - name: 健康检查
+        run: |
+          sleep 10
+          curl -f ${{ secrets.STAGING_API_URL }}/health || exit 1
+
+  # 任务 3: 部署到 Production 环境
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'production'
+    environment:
+      name: production
+      url: https://api.bmad.com
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      # 手动批准部署到生产环境
+      - name: 等待批准
+        uses: trstringer/manual-approval@v1.0.0
+        timeout-minutes: 60
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: zhangchenyu
+          minimum-approvals: 1
+
+      - name: 部署到阿里云 ECS (Production)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PRODUCTION_SSH_HOST }}
+          username: ${{ secrets.PRODUCTION_SSH_USERNAME }}
+          key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PRODUCTION_SSH_PORT || 22 }}
+          script_stop: true
+          script: |
+            echo "Deploying to Production environment..."
+
+            # 创建备份
+            docker exec bmad-backend-production npm run db:backup || true
+
+            # 拉取最新镜像
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+            # 停止旧容器（保持零停机）
+            docker stop bmad-backend-production-old || true
+            docker rm bmad-backend-production-old || true
+            docker rename bmad-backend-production bmad-backend-production-old || true
+
+            # 启动新容器
+            docker run -d \
+              --name bmad-backend-production \
+              --restart unless-stopped \
+              -p 3000:3000 \
+              --env-file /opt/bmad/production/.env \
+              --network bmad-network \
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+            # 健康检查
+            sleep 15
+            if ! curl -f http://localhost:3000/health; then
+              echo "Health check failed, rolling back..."
+              docker stop bmad-backend-production
+              docker rm bmad-backend-production
+              docker rename bmad-backend-production-old bmad-backend-production
+              docker start bmad-backend-production
+              exit 1
+            fi
+
+            # 清理旧容器
+            docker stop bmad-backend-production-old || true
+            docker rm bmad-backend-production-old || true
+
+            # 清理旧镜像
+            docker image prune -af --filter "until=168h"
+
+            echo "Deployment to Production completed successfully!"
+
+      - name: 通知部署结果
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            Production Deployment ${{ job.status }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  # 任务 4: 数据库迁移 (Production)
+  db-migrate-production:
+    name: Database Migration
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 运行数据库迁移
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PRODUCTION_SSH_HOST }}
+          username: ${{ secrets.PRODUCTION_SSH_USERNAME }}
+          key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PRODUCTION_SSH_PORT || 22 }}
+          script: |
+            cd /opt/bmad/production
+            docker exec bmad-backend-production npx prisma migrate deploy
