@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthStore } from '@/store/auth-store';
 import { authService } from '@/services/auth.service';
+import type { LoginRequest } from '@/types';
 
 export default function LoginPage() {
   const router = useRouter();

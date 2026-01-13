@@ -12,9 +12,10 @@ import { UsersModule } from './modules/users/users.module';
 import { CouponsModule } from './modules/coupons/coupons.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { BannersModule } from './modules/banners/banners.module';
+import { StatisticsModule } from './modules/statistics/statistics.module';
 
 @Module({
-  imports: [PrismaModule, CacheModule, OssModule, AuthModule, ProductsModule, OrdersModule, RefundsModule, UsersModule, CouponsModule, ReviewsModule, BannersModule],
+  imports: [PrismaModule, CacheModule, OssModule, AuthModule, ProductsModule, OrdersModule, RefundsModule, UsersModule, CouponsModule, ReviewsModule, BannersModule, StatisticsModule],
   controllers: [AppController],
   providers: [AppService],
 })

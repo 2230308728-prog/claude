@@ -218,8 +218,8 @@ export default function RefundDetailPage() {
                 <span className="flex-1">{refund.user?.nickname || '-'}</span>
               </div>
               <div className="flex items-start">
-                <span className="text-sm text-gray-500 w-24">手机号:</span>
-                <span className="font-mono">{refund.user?.phone || '-'}</span>
+                <span className="text-sm text-gray-500 w-24">邮箱:</span>
+                <span className="flex-1">{refund.user?.email || '-'}</span>
               </div>
             </div>
           </CardContent>

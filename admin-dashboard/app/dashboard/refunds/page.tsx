@@ -185,8 +185,8 @@ export default function RefundsPage() {
                         <TableCell className="font-mono text-sm">{refund.order?.orderNo || '-'}</TableCell>
                         <TableCell>
                           <div>
-                            <div className="font-medium">{refund.user?.nickname || refund.user?.phone || '-'}</div>
-                            <div className="text-xs text-gray-500">{refund.user?.phone || ''}</div>
+                            <div className="font-medium">{refund.user?.nickname || refund.user?.email || '-'}</div>
+                            <div className="text-xs text-gray-500">{refund.user?.email || ''}</div>
                           </div>
                         </TableCell>
                         <TableCell className="font-medium">¥{refund.amount}</TableCell>
