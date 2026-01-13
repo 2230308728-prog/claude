@@ -224,17 +224,8 @@ Page({
 
   // 联系客服
   contactService() {
-    wx.showModal({
-      title: '联系客服',
-      content: '客服电话：400-123-4567\n工作时间：9:00-18:00',
-      confirmText: '拨打电话',
-      success: (res) => {
-        if (res.confirm) {
-          wx.makePhoneCall({
-            phoneNumber: '4001234567'
-          });
-        }
-      }
+    wx.navigateTo({
+      url: `/pages/service/service?orderNo=${this.data.order.orderNo}`
     });
   }
 });

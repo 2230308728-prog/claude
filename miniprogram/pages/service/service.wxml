@@ -1,0 +1,148 @@
+<!--pages/service/service.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="header-title">联系客服</view>
+    <view class="header-desc">我们会尽快回复您的问题</view>
+  </view>
+
+  <!-- 快捷入口 -->
+  <view class="quick-actions">
+    <view class="action-item" bindtap="makePhoneCall">
+      <view class="action-icon phone">
+        <text class="icon">📞</text>
+      </view>
+      <view class="action-info">
+        <view class="action-title">电话咨询</view>
+        <view class="action-desc">400-123-4567</view>
+      </view>
+      <view class="action-arrow">→</view>
+    </view>
+
+    <view class="action-item" bindtap="copyWeChat">
+      <view class="action-icon wechat">
+        <text class="icon">💬</text>
+      </view>
+      <view class="action-info">
+        <view class="action-title">微信客服</view>
+        <view class="action-desc">bmad_service</view>
+      </view>
+      <view class="action-arrow">→</view>
+    </view>
+
+    <view class="action-item" bindtap="sendEmail">
+      <view class="action-icon email">
+        <text class="icon">📧</text>
+      </view>
+      <view class="action-info">
+        <view class="action-title">邮件联系</view>
+        <view class="action-desc">service@bmad.com</view>
+      </view>
+      <view class="action-arrow">→</view>
+    </view>
+
+    <view class="action-item" bindtap="viewFAQ">
+      <view class="action-icon faq">
+        <text class="icon">❓</text>
+      </view>
+      <view class="action-info">
+        <view class="action-title">常见问题</view>
+        <view class="action-desc">查看常见问题解答</view>
+      </view>
+      <view class="action-arrow">→</view>
+    </view>
+  </view>
+
+  <!-- 工作时间 -->
+  <view class="work-hours">
+    <view class="work-hours-title">工作时间</view>
+    <view class="work-hours-content">
+      <view class="work-hours-item">
+        <text class="label">周一至周五</text>
+        <text class="time">9:00 - 18:00</text>
+      </view>
+      <view class="work-hours-item">
+        <text class="label">周六至周日</text>
+        <text class="time">10:00 - 17:00</text>
+      </view>
+    </view>
+    <view class="work-hours-tip">节假日可能会有延迟，请谅解</view>
+  </view>
+
+  <!-- 留言反馈 -->
+  <view class="feedback-section">
+    <view class="section-title">留言反馈</view>
+    <view class="feedback-form">
+      <view class="form-item">
+        <view class="form-label">问题类型</view>
+        <view class="form-value">
+          <picker bindchange="selectType" value="{{typeIndex}}" range="{{types}}">
+            <view class="picker">
+              {{types[typeIndex]}}
+              <text class="picker-arrow">▼</text>
+            </view>
+          </picker>
+        </view>
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">订单号（选填）</view>
+        <input
+          class="form-input"
+          placeholder="请输入订单号"
+          value="{{orderNo}}"
+          bindinput="onOrderNoInput"
+        />
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">问题描述</view>
+        <textarea
+          class="form-textarea"
+          placeholder="请详细描述您遇到的问题"
+          value="{{content}}"
+          bindinput="onContentInput"
+          maxlength="500"
+          show-confirm-bar="{{false}}"
+          auto-height
+        ></textarea>
+        <view class="char-count">{{content.length}}/500</view>
+      </view>
+
+      <view class="form-item">
+        <view class="form-label">联系电话</view>
+        <input
+          class="form-input"
+          type="number"
+          placeholder="请输入您的手机号"
+          value="{{phone}}"
+          bindinput="onPhoneInput"
+        />
+      </view>
+
+      <button class="submit-btn" bindtap="submitFeedback" disabled="{{submitting}}">
+        {{submitting ? '提交中...' : '提交反馈'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 常见问题弹窗 -->
+  <view class="faq-popup {{showFAQ ? 'show' : ''}}" catchtap="hideFAQ">
+    <view class="faq-content" catchtap="stopPropagation">
+      <view class="faq-header">
+        <view class="faq-title">常见问题</view>
+        <view class="faq-close" bindtap="hideFAQ">×</view>
+      </view>
+      <scroll-view class="faq-list" scroll-y>
+        <view class="faq-item" wx:for="{{faqs}}" wx:key="index">
+          <view class="faq-question" bindtap="toggleFAQ" data-index="{{index}}">
+            <text class="faq-q">Q: {{item.question}}</text>
+            <text class="faq-icon {{item.expanded ? 'expanded' : ''}}">▼</text>
+          </view>
+          <view class="faq-answer {{item.expanded ? 'show' : ''}}">
+            <text>A: {{item.answer}}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</view>
