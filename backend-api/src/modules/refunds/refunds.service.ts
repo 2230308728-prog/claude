@@ -14,6 +14,7 @@ import {
 } from './dto';
 import * as crypto from 'crypto';
 import axios from 'axios';
+import { NotificationsService } from '../notifications/notifications.service';
 
 /**
  * 分页响应接口
@@ -50,6 +51,7 @@ export class RefundsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly cache: CacheService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   // ============================================
@@ -243,7 +245,12 @@ export class RefundsService {
     const refund = await this.prisma.refund.findUnique({
       where: { id: refundId },
       include: {
-        order: true,
+        order: {
+          include: {
+            product: true,
+          },
+        },
+        user: true,
       },
     });
 
@@ -267,6 +274,19 @@ export class RefundsService {
         },
       });
 
+      // 发送退款拒绝通知
+      if (refund.user.openid) {
+        this.notificationsService.sendRefundNotification(
+          refund.user.openid,
+          refund.order.product.title,
+          String(refund.refundAmount),
+          refund.refundNo,
+          'REJECTED',
+        ).catch((error) => {
+          this.logger.error(`Failed to send refund rejection notification: ${error.message}`);
+        });
+      }
+
       this.logger.log(`Refund rejected: ${refund.refundNo}`);
       return updated;
     }
@@ -282,6 +302,19 @@ export class RefundsService {
           approvedAt: new Date(),
         },
       });
+
+      // 发送退款批准通知
+      if (refund.user.openid) {
+        this.notificationsService.sendRefundNotification(
+          refund.user.openid,
+          refund.order.product.title,
+          String(refund.refundAmount),
+          refund.refundNo,
+          'APPROVED',
+        ).catch((error) => {
+          this.logger.error(`Failed to send refund approval notification: ${error.message}`);
+        });
+      }
 
       // 调用微信退款接口
       try {
@@ -314,7 +347,14 @@ export class RefundsService {
     // 查找退款记录
     const refund = await this.prisma.refund.findUnique({
       where: { refundNo: out_refund_no },
-      include: { order: true },
+      include: {
+        order: {
+          include: {
+            product: true,
+          },
+        },
+        user: true,
+      },
     });
 
     if (!refund) {
@@ -351,12 +391,38 @@ export class RefundsService {
         });
       });
 
+      // 发送退款完成通知
+      if (refund.user.openid) {
+        this.notificationsService.sendRefundNotification(
+          refund.user.openid,
+          refund.order.product.title,
+          String(refund.refundAmount),
+          refund.refundNo,
+          'COMPLETED',
+        ).catch((error) => {
+          this.logger.error(`Failed to send refund completion notification: ${error.message}`);
+        });
+      }
+
       this.logger.log(`Refund completed: ${out_refund_no}`);
     } else if (refund_status === 'FAILED') {
       await this.prisma.refund.update({
         where: { id: refund.id },
         data: { status: RefundStatus.FAILED },
       });
+
+      // 发送退款失败通知
+      if (refund.user.openid) {
+        this.notificationsService.sendRefundNotification(
+          refund.user.openid,
+          refund.order.product.title,
+          String(refund.refundAmount),
+          refund.refundNo,
+          'FAILED',
+        ).catch((error) => {
+          this.logger.error(`Failed to send refund failure notification: ${error.message}`);
+        });
+      }
     }
 
     return { code: 'SUCCESS', message: 'OK' };

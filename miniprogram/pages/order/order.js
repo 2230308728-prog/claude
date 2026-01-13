@@ -172,6 +172,8 @@ Page({
               icon: 'success'
             });
             this.loadOrder();
+            // 支付成功后请求订阅消息授权
+            this.requestSubscribeMessage();
           },
           fail: (err) => {
             if (err.errMsg.includes('cancel')) {
@@ -195,6 +197,34 @@ Page({
           icon: 'none'
         });
       });
+  },
+
+  // 请求订阅消息授权
+  requestSubscribeMessage() {
+    // 需要在微信公众平台配置订阅消息模板ID
+    const tmplIds = [
+      '出行提醒模板ID', // 需要替换为实际的模板ID
+      '订单状态变更模板ID'
+    ];
+
+    // 过滤掉空值
+    const validTmplIds = tmplIds.filter(id => id && id !== '出行提醒模板ID' && id !== '订单状态变更模板ID');
+
+    if (validTmplIds.length === 0) {
+      console.log('未配置订阅消息模板ID');
+      return;
+    }
+
+    wx.requestSubscribeMessage({
+      tmplIds: validTmplIds,
+      success: (res) => {
+        console.log('订阅消息授权结果:', res);
+        // 可以将授权结果保存到服务器
+      },
+      fail: (err) => {
+        console.log('订阅消息授权失败:', err);
+      }
+    });
   },
 
   // 确认完成

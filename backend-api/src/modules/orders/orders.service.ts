@@ -8,6 +8,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { CacheService } from '../../common/cache/cache.service';
 import { ProductsService } from '../products/products.service';
 import { CouponsService } from '../coupons/coupons.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { OrderStatus } from '@prisma/client';
 import {
   CreateOrderDto,
@@ -54,6 +55,7 @@ export class OrdersService {
     private readonly cache: CacheService,
     private readonly productsService: ProductsService,
     private readonly couponsService: CouponsService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   // ============================================
@@ -281,6 +283,10 @@ export class OrdersService {
         id: orderId,
         userId,
       },
+      include: {
+        product: true,
+        user: true,
+      },
     });
 
     if (!order) {
@@ -304,6 +310,19 @@ export class OrdersService {
       where: { id: order.productId },
       data: { stock: { increment: order.participantCount } },
     });
+
+    // 发送订单取消通知
+    if (order.user.openid) {
+      this.notificationsService.sendOrderStatusNotification(
+        order.user.openid,
+        order.product.title,
+        order.orderNo,
+        'CANCELLED',
+        '订单已取消',
+      ).catch((error) => {
+        this.logger.error(`Failed to send order cancellation notification: ${error.message}`);
+      });
+    }
 
     this.logger.log(`Order cancelled: ${order.orderNo} by user ${userId}`);
     return updated;
@@ -384,6 +403,10 @@ export class OrdersService {
     // 查找订单
     const order = await this.prisma.order.findUnique({
       where: { orderNo: out_trade_no },
+      include: {
+        product: true,
+        user: true,
+      },
     });
 
     if (!order) {
@@ -417,6 +440,19 @@ export class OrdersService {
         },
       });
     });
+
+    // 发送订单支付成功通知
+    if (order.user.openid) {
+      this.notificationsService.sendOrderStatusNotification(
+        order.user.openid,
+        order.product.title,
+        order.orderNo,
+        'PAID',
+        '订单已支付',
+      ).catch((error) => {
+        this.logger.error(`Failed to send order payment notification: ${error.message}`);
+      });
+    }
 
     this.logger.log(`Order paid successfully: ${out_trade_no}`);
 

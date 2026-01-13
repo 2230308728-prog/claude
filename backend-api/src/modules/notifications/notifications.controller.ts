@@ -57,12 +57,22 @@ export class NotificationsController {
         );
 
       case 'REFUND':
-        // 退款通知可以根据需要实现
-        return { success: true, message: '退款通知功能待实现' };
+        return this.notificationsService.sendRefundNotification(
+          user.openid,
+          dto.data.productName,
+          dto.data.refundAmount,
+          dto.data.refundNo,
+          dto.data.refundStatus,
+        );
 
       case 'ORDER_STATUS':
-        // 订单状态变更通知可以根据需要实现
-        return { success: true, message: '订单状态通知功能待实现' };
+        return this.notificationsService.sendOrderStatusNotification(
+          user.openid,
+          dto.data.productName,
+          dto.data.orderNo,
+          dto.data.status,
+          dto.data.statusText,
+        );
 
       default:
         throw new BadRequestException(`不支持的通知类型: ${dto.type}`);
@@ -101,6 +111,48 @@ export class NotificationsController {
       data.bookingDate,
       data.location,
       data.orderId
+    );
+  }
+
+  @Post('test-refund')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '测试退款通知（管理员）' })
+  async testRefund(@Body() data: {
+    openid: string;
+    productName: string;
+    refundAmount: string;
+    refundNo: string;
+    refundStatus: 'APPROVED' | 'REJECTED' | 'COMPLETED' | 'FAILED';
+  }) {
+    return this.notificationsService.sendRefundNotification(
+      data.openid,
+      data.productName,
+      data.refundAmount,
+      data.refundNo,
+      data.refundStatus
+    );
+  }
+
+  @Post('test-order-status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '测试订单状态通知（管理员）' })
+  async testOrderStatus(@Body() data: {
+    openid: string;
+    productName: string;
+    orderNo: string;
+    status: string;
+    statusText?: string;
+  }) {
+    return this.notificationsService.sendOrderStatusNotification(
+      data.openid,
+      data.productName,
+      data.orderNo,
+      data.status,
+      data.statusText || undefined
     );
   }
 

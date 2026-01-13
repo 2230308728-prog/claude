@@ -150,4 +150,86 @@ export class NotificationsService {
       `pages/order/order?id=${orderNo}`
     );
   }
+
+  /**
+   * 发送退款通知
+   */
+  async sendRefundNotification(
+    openid: string,
+    productName: string,
+    refundAmount: string,
+    refundNo: string,
+    refundStatus: 'APPROVED' | 'REJECTED' | 'COMPLETED' | 'FAILED'
+  ) {
+    const templateId = this.configService.get<string>('WECHAT_TEMPLATE_REFUND') || '';
+
+    if (!templateId) {
+      this.logger.warn('未配置退款模板ID，跳过发送');
+      return { success: false, error: '未配置模板ID' };
+    }
+
+    // 状态映射
+    const statusMap: Record<string, string> = {
+      'APPROVED': '退款已批准',
+      'REJECTED': '退款已拒绝',
+      'COMPLETED': '退款已完成',
+      'FAILED': '退款失败'
+    };
+
+    const data = {
+      thing1: productName,
+      amount2: refundAmount,
+      character_string3: refundNo,
+      phrase4: statusMap[refundStatus] || refundStatus
+    };
+
+    return this.sendSubscribeMessage(
+      openid,
+      templateId,
+      data,
+      `pages/order/order?id=${refundNo}`
+    );
+  }
+
+  /**
+   * 发送订单状态变更通知
+   */
+  async sendOrderStatusNotification(
+    openid: string,
+    productName: string,
+    orderNo: string,
+    status: string,
+    statusText?: string
+  ) {
+    const templateId = this.configService.get<string>('WECHAT_TEMPLATE_ORDER_STATUS') || '';
+
+    if (!templateId) {
+      this.logger.warn('未配置订单状态模板ID，跳过发送');
+      return { success: false, error: '未配置模板ID' };
+    }
+
+    // 状态文本映射
+    const statusTextMap: Record<string, string> = {
+      'PAID': '订单已支付',
+      'CANCELLED': '订单已取消',
+      'COMPLETED': '订单已完成',
+      'REFUNDED': '订单已退款'
+    };
+
+    const finalStatusText = statusText || statusTextMap[status] || status;
+
+    const data = {
+      thing1: productName,
+      character_string2: orderNo,
+      phrase3: finalStatusText,
+      date4: new Date().toLocaleDateString('zh-CN')
+    };
+
+    return this.sendSubscribeMessage(
+      openid,
+      templateId,
+      data,
+      `pages/order/order?id=${orderNo}`
+    );
+  }
 }

@@ -14,9 +14,10 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
 import { BannersModule } from './modules/banners/banners.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { SettingsModule } from './modules/settings/settings.module';
 
 @Module({
-  imports: [PrismaModule, CacheModule, OssModule, AuthModule, ProductsModule, OrdersModule, RefundsModule, UsersModule, CouponsModule, ReviewsModule, BannersModule, StatisticsModule, NotificationsModule],
+  imports: [PrismaModule, CacheModule, OssModule, AuthModule, ProductsModule, OrdersModule, RefundsModule, UsersModule, CouponsModule, ReviewsModule, BannersModule, StatisticsModule, NotificationsModule, SettingsModule],
   controllers: [AppController],
   providers: [AppService],
 })
