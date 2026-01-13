@@ -7,7 +7,10 @@ Page({
     productId: null,
     product: null,
     loading: false,
-    isFavorite: false
+    isFavorite: false,
+    reviewStats: null,
+    reviews: [],
+    hasMoreReviews: false
   },
 
   onLoad(options) {
@@ -16,6 +19,7 @@ Page({
       this.setData({ productId: id });
       this.loadProduct();
       this.checkFavorite();
+      this.loadReviews();
     } else {
       wx.showToast({
         title: '产品不存在',
@@ -123,17 +127,46 @@ Page({
 
   // 联系客服
   contactService() {
-    wx.showModal({
-      title: '联系客服',
-      content: '客服电话：400-123-4567\n工作时间：9:00-18:00',
-      confirmText: '拨打电话',
-      success: (res) => {
-        if (res.confirm) {
-          wx.makePhoneCall({
-            phoneNumber: '4001234567'
-          });
-        }
-      }
+    wx.navigateTo({
+      url: '/pages/service/service'
+    });
+  },
+
+  // 加载评价统计和列表
+  async loadReviews() {
+    try {
+      // 加载评价统计
+      const statsRes = await request.get(`/reviews/stats?productId=${this.data.productId}`);
+      this.setData({ reviewStats: statsRes.data });
+
+      // 加载评价列表（仅显示已审核通过的评价）
+      const reviewsRes = await request.get('/reviews', {
+        productId: this.data.productId,
+        status: 'APPROVED',
+        pageSize: 3
+      });
+      this.setData({
+        reviews: reviewsRes.data || [],
+        hasMoreReviews: (reviewsRes.data || []).length >= 3
+      });
+    } catch (error) {
+      console.error('加载评价失败:', error);
+    }
+  },
+
+  // 查看更多评价
+  viewMoreReviews() {
+    wx.navigateTo({
+      url: `/pages/reviews/reviews?tab=completed&productId=${this.data.productId}`
+    });
+  },
+
+  // 预览图片
+  previewImage(e) {
+    const { url, urls } = e.currentTarget.dataset;
+    wx.previewImage({
+      current: url,
+      urls: urls
     });
   },
 

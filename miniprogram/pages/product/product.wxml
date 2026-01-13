@@ -96,6 +96,70 @@
     </view>
   </view>
 
+  <!-- 用户评价 -->
+  <view class="reviews-section" wx:if="{{reviewStats}}">
+    <view class="section-header">
+      <text class="section-title">用户评价</text>
+      <view class="rating-summary">
+        <text class="rating-score">{{reviewStats.averageRating}}</text>
+        <text class="rating-count">/ 5分</text>
+        <text class="review-total">{{reviewStats.totalCount}}条评价</text>
+      </view>
+    </view>
+
+    <!-- 评分分布 -->
+    <view class="rating-distribution">
+      <view class="rating-item" wx:for="{{[5,4,3,2,1]}}" wx:key="*">
+        <view class="star-label">
+          <text class="star">{{item}}</text>
+          <text class="star-text">星</text>
+        </view>
+        <view class="rating-bar">
+          <view class="rating-fill" style="width: {{reviewStats.totalCount > 0 ? (reviewStats.ratingCounts[item] / reviewStats.totalCount * 100) : 0}}%"></view>
+        </view>
+        <text class="rating-count">{{reviewStats.ratingCounts[item]}}</text>
+      </view>
+    </view>
+
+    <!-- 评价列表 -->
+    <view class="reviews-list" wx:if="{{reviews.length > 0}}">
+      <view class="review-item" wx:for="{{reviews}}" wx:key="id">
+        <view class="review-header">
+          <view class="reviewer-info">
+            <image class="reviewer-avatar" src="{{item.user?.avatarUrl || '/images/default_avatar.png'}}" mode="aspectFill"></image>
+            <text class="reviewer-name">{{item.user?.nickname || (item.isAnonymous ? '匿名用户' : '用户')}}</text>
+          </view>
+          <view class="review-rating">
+            <text class="star" wx:for="{{[1,2,3,4,5]}}" wx:key="*" wx:for-item="star" class="{{star <= item.rating ? 'filled' : ''}}">★</text>
+          </view>
+        </view>
+        <view class="review-content">{{item.content}}</view>
+        <view class="review-images" wx:if="{{item.images && item.images.length > 0}}">
+          <image class="review-image" wx:for="{{item.images}}" wx:key="*"
+            src="{{item}}"
+            mode="aspectFill"
+            bindtap="previewImage"
+            data-url="{{item}}"
+            data-urls="{{item.images}}"
+          ></image>
+        </view>
+        <view class="review-footer">
+          <text class="review-date">{{item.createdAt}}</text>
+        </view>
+        <view class="admin-reply" wx:if="{{item.adminReply}}">
+          <text class="reply-label">商家回复：</text>
+          <text class="reply-content">{{item.adminReply}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 查看更多 -->
+    <view class="view-more-reviews" wx:if="{{hasMoreReviews}}" bindtap="viewMoreReviews">
+      <text>查看全部评价</text>
+      <text class="arrow">›</text>
+    </view>
+  </view>
+
   <!-- 底部操作栏 -->
   <view class="bottom-bar">
     <view class="bar-left">
