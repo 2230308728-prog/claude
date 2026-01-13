@@ -3,9 +3,12 @@
     "pages/index/index",
     "pages/products/products",
     "pages/product/product",
+    "pages/favorites/favorites",
+    "pages/addresses/addresses",
     "pages/order-confirm/order-confirm",
     "pages/orders/orders",
     "pages/order/order",
+    "pages/refund/refund",
     "pages/profile/profile",
     "pages/login/login"
   ],

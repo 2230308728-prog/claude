@@ -1,0 +1,74 @@
+<!--pages/favorites/favorites.wxml-->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">我的收藏</text>
+    <text class="count">{{favorites.length}}件商品</text>
+  </view>
+
+  <!-- 收藏列表 -->
+  <view class="favorites-list" wx:if="{{favorites.length > 0}}">
+    <view
+      class="favorite-item"
+      wx:for="{{favorites}}"
+      wx:key="id"
+    >
+      <!-- 产品信息 -->
+      <view class="product-info" bindtap="goToProduct" data-id="{{item.productId}}">
+        <image class="product-image" src="{{item.product.coverImage}}" mode="aspectFill"></image>
+        <view class="product-detail">
+          <text class="product-title">{{item.product.title}}</text>
+          <view class="product-tags">
+            <text class="tag tag-info" wx:if="{{item.product.category}}">{{item.product.category.name}}</text>
+          </view>
+          <view class="product-footer">
+            <text class="product-price">¥{{item.product.price}}</text>
+            <text class="product-stock" wx:if="{{item.product.stock > 0}}">有货</text>
+            <text class="product-stock out-of-stock" wx:else>售罄</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="item-actions">
+        <button
+          class="btn-action btn-cancel"
+          bindtap="cancelFavorite"
+          data-id="{{item.id}}"
+          data-product-id="{{item.productId}}"
+        >
+          取消收藏
+        </button>
+        <button
+          class="btn-action btn-buy"
+          bindtap="buyNow"
+          data-product-id="{{item.productId}}"
+          disabled="{{item.product.stock === 0}}"
+        >
+          立即预订
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:else>
+    <image class="empty-icon" src="/images/icon_heart.png" mode="aspectFit"></image>
+    <text class="empty-title">暂无收藏</text>
+    <text class="empty-desc">快去收藏喜欢的商品吧</text>
+    <button class="btn-go-shop" bindtap="goToShop">去逛逛</button>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar" wx:if="{{favorites.length > 0}}">
+    <button class="btn-manage" bindtap="toggleEditMode">
+      {{editMode ? '完成' : '管理'}}
+    </button>
+    <button class="btn-delete-selected" wx:if="{{editMode}}" bindtap="deleteSelected">
+      删除选中 ({{selectedCount}})
+    </button>
+    <button class="btn-add-cart" wx:else bindtap="addAllToCart">
+      全部加入预订
+    </button>
+  </view>
+</view>
