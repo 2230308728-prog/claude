@@ -193,3 +193,81 @@ export interface RefundQuery {
   endDate?: string;
   keyword?: string;
 }
+
+// Coupon types
+export type CouponType = 'PERCENT' | 'AMOUNT';
+export type CouponStatus = 'ACTIVE' | 'EXPIRED' | 'DISABLED';
+export type UserCouponStatus = 'AVAILABLE' | 'USED' | 'EXPIRED';
+
+export interface Coupon {
+  id: number;
+  name: string;
+  description?: string;
+  type: CouponType;
+  value: number;
+  minAmount?: number;
+  maxDiscount?: number;
+  totalQuantity: number;
+  claimedQuantity: number;
+  limitPerUser: number;
+  validFrom: string;
+  validUntil: string;
+  isEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCouponDto {
+  name: string;
+  description?: string;
+  type: CouponType;
+  value: number;
+  minAmount?: number;
+  maxDiscount?: number;
+  totalQuantity: number;
+  limitPerUser?: number;
+  validFrom: string;
+  validUntil: string;
+  productIds?: number[];
+  categoryIds?: number[];
+  isEnabled?: boolean;
+}
+
+export interface UpdateCouponDto {
+  name?: string;
+  description?: string;
+  value?: number;
+  minAmount?: number;
+  maxDiscount?: number;
+  isEnabled?: boolean;
+}
+
+export interface CouponQuery {
+  page?: number;
+  pageSize?: number;
+  keyword?: string;
+  status?: CouponStatus;
+}
+
+export interface CouponStats {
+  couponId: number;
+  totalClaims: number;
+  usedCount: number;
+  availableCount: number;
+  expiredCount: number;
+  totalDiscount: number;
+  avgOrderValue: number;
+  claimsByDate: { date: string; count: number }[];
+  usageByDate: { date: string; count: number }[];
+}
+
+export interface UserCoupon {
+  id: number;
+  userId: number;
+  couponId: number;
+  coupon?: Coupon;
+  status: UserCouponStatus;
+  usedAt?: string;
+  expiresAt: string;
+  createdAt: string;
+}

@@ -1,0 +1,100 @@
+<!--pages/coupon-detail/coupon-detail.wxml-->
+<view class="container">
+  <!-- 优惠券卡片 -->
+  <view class="coupon-card">
+    <!-- 左侧金额区域 -->
+    <view class="coupon-left">
+      <view class="coupon-amount">
+        <text class="amount-symbol">¥</text>
+        <text class="amount-value" wx:if="{{coupon.type === 'AMOUNT'}}">{{coupon.value}}</text>
+        <text class="amount-value" wx:else>{{coupon.value}}</text>
+        <text class="amount-unit" wx:if="{{coupon.type === 'PERCENT'}}">折</text>
+      </view>
+      <view class="coupon-condition" wx:if="{{coupon.minAmount}}">
+        满{{coupon.minAmount}}元可用
+      </view>
+      <view class="coupon-condition" wx:else>无门槛</view>
+    </view>
+
+    <!-- 中间虚线 -->
+    <view class="coupon-divider">
+      <view class="divider-top"></view>
+      <view class="divider-dashed"></view>
+      <view class="divider-bottom"></view>
+    </view>
+
+    <!-- 右侧信息区域 -->
+    <view class="coupon-right">
+      <view class="coupon-name">{{coupon.name}}</view>
+      <view class="coupon-desc" wx:if="{{coupon.description}}">
+        {{coupon.description}}
+      </view>
+      <view class="coupon-time">
+        有效期 {{validFrom}} 至 {{validUntil}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 优惠券详情 -->
+  <view class="detail-section">
+    <view class="section-title">使用说明</view>
+
+    <view class="detail-item" wx:if="{{coupon.minAmount}}">
+      <text class="detail-label">使用门槛：</text>
+      <text class="detail-value">订单金额满 ¥{{coupon.minAmount}} 可用</text>
+    </view>
+
+    <view class="detail-item" wx:if="{{coupon.type === 'PERCENT' && coupon.maxDiscount}}">
+      <text class="detail-label">最大优惠：</text>
+      <text class="detail-value">最高优惠 ¥{{coupon.maxDiscount}}</text>
+    </view>
+
+    <view class="detail-item">
+      <text class="detail-label">发行数量：</text>
+      <text class="detail-value">{{coupon.totalQuantity}} 张</text>
+    </view>
+
+    <view class="detail-item">
+      <text class="detail-label">每人限领：</text>
+      <text class="detail-value">{{coupon.limitPerUser}} 张</text>
+    </view>
+
+    <view class="detail-item">
+      <text class="detail-label">已领取：</text>
+      <text class="detail-value">{{coupon.claimedQuantity}} 张</text>
+    </view>
+
+    <view class="detail-item">
+      <text class="detail-label">适用范围：</text>
+      <text class="detail-value" wx:if="{{!coupon.productIds || coupon.productIds.length === 0}}">全部产品可用</text>
+      <text class="detail-value" wx:else>部分产品可用</text>
+    </view>
+
+    <view class="detail-item">
+      <text class="detail-label">有效期：</text>
+      <text class="detail-value">{{validFrom}} - {{validUntil}}</text>
+    </view>
+  </view>
+
+  <!-- 领取进度 -->
+  <view class="progress-section" wx:if="{{coupon.claimedQuantity < coupon.totalQuantity}}">
+    <view class="progress-header">
+      <text class="progress-label">领取进度</text>
+      <text class="progress-text">{{coupon.claimedQuantity}} / {{coupon.totalQuantity}}</text>
+    </view>
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{progressPercent}}%"></view>
+    </view>
+  </view>
+
+  <!-- 底部操作按钮 -->
+  <view class="bottom-bar">
+    <button
+      class="btn-claim"
+      bindtap="claimCoupon"
+      disabled="{{coupon.claimedQuantity >= coupon.totalQuantity || !canClaim}}"
+    >
+      {{coupon.claimedQuantity >= coupon.totalQuantity ? '已抢光' : (canClaim ? '立即领取' : '已领取')}}
+    </button>
+  </view>
+</view>

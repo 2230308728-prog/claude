@@ -103,17 +103,22 @@ Page({
 
   // 我的收藏
   goToFavorites() {
-    wx.showToast({
-      title: '功能开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/favorites/favorites'
+    });
+  },
+
+  // 我的优惠券
+  goToCoupons() {
+    wx.navigateTo({
+      url: '/pages/coupons/coupons'
     });
   },
 
   // 收货地址
   goToAddress() {
-    wx.showToast({
-      title: '功能开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/addresses/addresses'
     });
   },
 

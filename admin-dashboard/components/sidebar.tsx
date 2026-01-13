@@ -13,6 +13,7 @@ import {
   LogOut,
   FolderOpen,
   UndoDashed,
+  Ticket,
 } from 'lucide-react';
 
 const navigation = [
@@ -21,6 +22,7 @@ const navigation = [
   { name: '产品分类', href: '/dashboard/products/categories', icon: FolderOpen },
   { name: '订单管理', href: '/dashboard/orders', icon: ShoppingCart },
   { name: '退款管理', href: '/dashboard/refunds', icon: UndoDashed },
+  { name: '优惠券管理', href: '/dashboard/coupons', icon: Ticket },
   { name: '用户管理', href: '/dashboard/users', icon: Users },
   { name: '设置', href: '/dashboard/settings', icon: Settings },
 ];

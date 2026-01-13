@@ -10,7 +10,9 @@
     "pages/order/order",
     "pages/refund/refund",
     "pages/profile/profile",
-    "pages/login/login"
+    "pages/login/login",
+    "pages/coupons/coupons",
+    "pages/coupon-detail/coupon-detail"
   ],
   "window": {
     "backgroundTextStyle": "light",

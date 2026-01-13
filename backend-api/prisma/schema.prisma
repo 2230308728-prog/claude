@@ -71,6 +71,23 @@ enum IssuePriority {
   URGENT
 }
 
+enum CouponType {
+  PERCENT
+  AMOUNT
+}
+
+enum CouponStatus {
+  ACTIVE
+  EXPIRED
+  DISABLED
+}
+
+enum UserCouponStatus {
+  AVAILABLE
+  USED
+  EXPIRED
+}
+
 // ============================================
 // 核心数据模型
 // ============================================
@@ -92,6 +109,7 @@ model User {
   orders      Order[]      @relation("UserOrders")
   refunds     Refund[]     @relation("UserRefunds")
   userIssues  UserIssue[]  @relation("UserIssues")
+  userCoupons UserCoupon[] @relation("UserCoupons")
 
   @@index([status])
   @@map("users")
@@ -165,9 +183,10 @@ model Order {
   updatedAt       DateTime   @updatedAt @map("updated_at")
 
   // 关联关系
-  user    User    @relation("UserOrders", fields: [userId], references: [id])
-  product Product @relation("ProductOrders", fields: [productId], references: [id])
-  refunds Refund[] @relation("OrderRefunds")
+  user    User          @relation("UserOrders", fields: [userId], references: [id])
+  product Product       @relation("ProductOrders", fields: [productId], references: [id])
+  refunds Refund[]       @relation("OrderRefunds")
+  coupons  OrderCoupon[] @relation("OrderCoupons")
 
   @@index([userId])
   @@index([productId])
@@ -230,4 +249,70 @@ model UserIssue {
   @@index([status])
   @@index([priority])
   @@map("user_issues")
+}
+
+// 7. 优惠券表 (coupons)
+model Coupon {
+  id            Int               @id @default(autoincrement())
+  name          String            @map("name")
+  description   String?           @db.Text @map("description")
+  type          CouponType        @map("type")
+  value         Decimal           @db.Decimal(10, 2) @map("value")
+  minAmount     Decimal?          @db.Decimal(10, 2) @map("min_amount")
+  maxDiscount   Decimal?          @db.Decimal(10, 2) @map("max_discount")
+  totalQuantity Int               @map("total_quantity")
+  claimedQuantity Int              @default(0) @map("claimed_quantity")
+  limitPerUser  Int               @default(1) @map("limit_per_user")
+  validFrom     DateTime          @map("valid_from")
+  validUntil    DateTime          @map("valid_until")
+  isEnabled     Boolean           @default(true) @map("is_enabled")
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+
+  // 关联关系
+  userCoupons UserCoupon[] @relation("CouponUsers")
+  orderCoupons OrderCoupon[] @relation("CouponOrders")
+
+  @@index([isEnabled])
+  @@index([validFrom, validUntil])
+  @@map("coupons")
+}
+
+// 8. 用户优惠券表 (user_coupons)
+model UserCoupon {
+  id         Int              @id @default(autoincrement())
+  userId     Int              @map("user_id")
+  couponId   Int              @map("coupon_id")
+  status     UserCouponStatus @default(AVAILABLE) @map("status")
+  usedAt     DateTime?        @map("used_at")
+  expiresAt  DateTime         @map("expires_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  // 关联关系
+  user   User   @relation("UserCoupons", fields: [userId], references: [id])
+  coupon Coupon @relation("CouponUsers", fields: [couponId], references: [id])
+
+  @@unique([userId, couponId])
+  @@index([userId])
+  @@index([couponId])
+  @@index([status])
+  @@map("user_coupons")
+}
+
+// 9. 订单优惠券关联表 (order_coupons)
+model OrderCoupon {
+  id        Int     @id @default(autoincrement())
+  orderId   Int     @map("order_id")
+  couponId  Int     @map("coupon_id")
+  discount  Decimal @db.Decimal(10, 2) @map("discount")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // 关联关系
+  order  Order  @relation("OrderCoupons", fields: [orderId], references: [id])
+  coupon Coupon @relation("CouponOrders", fields: [couponId], references: [id])
+
+  @@unique([orderId, couponId])
+  @@index([orderId])
+  @@index([couponId])
+  @@map("order_coupons")
 }

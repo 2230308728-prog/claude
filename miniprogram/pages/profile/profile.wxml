@@ -60,6 +60,13 @@
       </view>
       <text class="menu-arrow">›</text>
     </view>
+    <view class="menu-item" bindtap="goToCoupons">
+      <view class="menu-left">
+        <image class="menu-icon" src="/images/icon_coupon.png" mode="aspectFit"></image>
+        <text class="menu-text">我的优惠券</text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
     <view class="menu-item" bindtap="goToAddress">
       <view class="menu-left">
         <image class="menu-icon" src="/images/icon_address.png" mode="aspectFit"></image>
