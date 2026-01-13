@@ -14,6 +14,7 @@ import {
   FolderOpen,
   UndoDashed,
   Ticket,
+  MessageSquare,
 } from 'lucide-react';
 
 const navigation = [
@@ -23,6 +24,7 @@ const navigation = [
   { name: '订单管理', href: '/dashboard/orders', icon: ShoppingCart },
   { name: '退款管理', href: '/dashboard/refunds', icon: UndoDashed },
   { name: '优惠券管理', href: '/dashboard/coupons', icon: Ticket },
+  { name: '评价管理', href: '/dashboard/reviews', icon: MessageSquare },
   { name: '用户管理', href: '/dashboard/users', icon: Users },
   { name: '设置', href: '/dashboard/settings', icon: Settings },
 ];

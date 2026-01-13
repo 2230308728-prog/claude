@@ -88,6 +88,12 @@ enum UserCouponStatus {
   EXPIRED
 }
 
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // ============================================
 // 核心数据模型
 // ============================================
@@ -110,6 +116,7 @@ model User {
   refunds     Refund[]     @relation("UserRefunds")
   userIssues  UserIssue[]  @relation("UserIssues")
   userCoupons UserCoupon[] @relation("UserCoupons")
+  reviews     Review[]     @relation("UserReviews")
 
   @@index([status])
   @@map("users")
@@ -153,6 +160,7 @@ model Product {
   // 关联关系
   category ProductCategory @relation("CategoryProducts", fields: [categoryId], references: [id])
   orders   Order[]          @relation("ProductOrders")
+  reviews  Review[]         @relation("ProductReviews")
 
   @@index([categoryId])
   @@index([status])
@@ -187,6 +195,7 @@ model Order {
   product Product       @relation("ProductOrders", fields: [productId], references: [id])
   refunds Refund[]       @relation("OrderRefunds")
   coupons  OrderCoupon[] @relation("OrderCoupons")
+  reviews  Review[]      @relation("OrderReview")
 
   @@index([userId])
   @@index([productId])
@@ -315,4 +324,34 @@ model OrderCoupon {
   @@index([orderId])
   @@index([couponId])
   @@map("order_coupons")
+}
+
+// 10. 评价表 (reviews)
+model Review {
+  id         Int         @id @default(autoincrement())
+  orderId    Int         @map("order_id")
+  userId     Int         @map("user_id")
+  productId  Int         @map("product_id")
+  rating     Int         @map("rating") // 1-5 星评分
+  content    String?     @db.Text @map("content")
+  images     String[]    @default([]) @map("images") // 评价图片
+  isAnonymous Boolean   @default(false) @map("is_anonymous") // 是否匿名
+  status     ReviewStatus @default(PENDING) @map("status") // 审核状态
+  adminReply String?     @db.Text @map("admin_reply") // 管理员回复
+  repliedAt  DateTime?   @map("replied_at")
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+
+  // 关联关系
+  user    User    @relation("UserReviews", fields: [userId], references: [id])
+  product Product @relation("ProductReviews", fields: [productId], references: [id])
+  order   Order   @relation("OrderReview", fields: [orderId], references: [id])
+
+  @@unique([orderId, productId]) // 每个订单产品只能评价一次
+  @@index([userId])
+  @@index([productId])
+  @@index([orderId])
+  @@index([status])
+  @@index([rating])
+  @@map("reviews")
 }

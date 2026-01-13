@@ -271,3 +271,73 @@ export interface UserCoupon {
   expiresAt: string;
   createdAt: string;
 }
+
+// Review types
+export type ReviewStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+export interface Review {
+  id: number;
+  orderId: number;
+  userId: number;
+  productId: number;
+  rating: number;
+  content?: string;
+  images: string[];
+  isAnonymous: boolean;
+  status: ReviewStatus;
+  adminReply?: string;
+  repliedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    id: number;
+    nickname?: string;
+    avatarUrl?: string;
+  };
+  product?: {
+    id: number;
+    title: string;
+    images: string[];
+  };
+  order?: {
+    id: number;
+    orderNo: string;
+  };
+}
+
+export interface CreateReviewDto {
+  orderId: number;
+  productId: number;
+  rating: number;
+  content?: string;
+  images?: string[];
+  isAnonymous?: boolean;
+}
+
+export interface UpdateReviewDto {
+  content?: string;
+  images?: string[];
+}
+
+export interface ReviewQuery {
+  page?: number;
+  pageSize?: number;
+  productId?: number;
+  userId?: number;
+  rating?: number;
+  status?: ReviewStatus;
+  keyword?: string;
+}
+
+export interface ReviewStats {
+  totalCount: number;
+  averageRating: number;
+  ratingCounts: {
+    5: number;
+    4: number;
+    3: number;
+    2: number;
+    1: number;
+  };
+}
+

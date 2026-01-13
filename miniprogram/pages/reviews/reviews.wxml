@@ -1,0 +1,92 @@
+<!--pages/reviews/reviews.wxml-->
+<view class="container">
+  <!-- Tab 切换 -->
+  <view class="tabs">
+    <view
+      class="tab-item {{currentTab === 'all' ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-tab="all"
+    >
+      全部
+    </view>
+    <view
+      class="tab-item {{currentTab === 'pending' ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-tab="pending"
+    >
+      待评价
+    </view>
+    <view
+      class="tab-item {{currentTab === 'completed' ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-tab="completed"
+    >
+      已评价
+    </view>
+  </view>
+
+  <!-- 评价列表 -->
+  <view class="reviews-list" wx:if="{{orders.length > 0}}">
+    <view
+      class="review-item"
+      wx:for="{{orders}}"
+      wx:key="id"
+      bindtap="goToOrder"
+      data-id="{{item.id}}"
+    >
+      <!-- 产品信息 -->
+      <view class="product-section">
+        <image class="product-image" src="{{item.product.images[0]}}" mode="aspectFill"></image>
+        <view class="product-info">
+          <view class="product-title">{{item.product.title}}</view>
+          <view class="order-info">
+            <text class="order-no">订单号: {{item.orderNo}}</text>
+            <text class="order-date">{{item.completedAt}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 评价状态 -->
+      <view class="review-status">
+        <view class="status-info" wx:if="{{item.review}}">
+          <view class="rating-stars">
+            <text
+              class="star {{index < item.review.rating ? 'filled' : ''}}"
+              wx:for="{{[1,2,3,4,5]}}"
+              wx:key="*"
+            >★</text>
+          </view>
+          <text class="status-text">已评价</text>
+        </view>
+          <view class="status-pending" wx:else>
+            <text class="status-text">待评价</text>
+          </view>
+        <button
+          class="btn-review"
+          wx:if="{{!item.review}}"
+          catchtap="createReview"
+          data-order-id="{{item.id}}"
+          data-product-id="{{item.product.id}}"
+        >
+          评价
+        </button>
+        <button
+          class="btn-view"
+          wx:else
+          catchtap="viewReview"
+          data-review-id="{{item.review.id}}"
+        >
+          查看评价
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:else>
+    <image class="empty-icon" src="/images/icon_review.png" mode="aspectFit"></image>
+    <text class="empty-title">{{currentTab === 'pending' ? '暂无待评价订单' : '暂无评价'}}</text>
+    <text class="empty-desc" wx:if="{{currentTab === 'all'}}">完成订单后即可评价</text>
+    <button class="btn-go-shop" bindtap="goToShop" wx:if="{{currentTab === 'all'}}">去逛逛</button>
+  </view>
+</view>

@@ -12,7 +12,9 @@
     "pages/profile/profile",
     "pages/login/login",
     "pages/coupons/coupons",
-    "pages/coupon-detail/coupon-detail"
+    "pages/coupon-detail/coupon-detail",
+    "pages/reviews/reviews",
+    "pages/review-create/review-create"
   ],
   "window": {
     "backgroundTextStyle": "light",

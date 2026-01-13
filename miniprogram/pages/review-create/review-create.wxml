@@ -1,0 +1,81 @@
+<!--pages/review-create/review-create.wxml-->
+<view class="container">
+  <!-- 产品信息 -->
+  <view class="product-info">
+    <image class="product-image" src="{{product.image}}" mode="aspectFill"></image>
+    <view class="product-details">
+      <view class="product-title">{{product.title}}</view>
+      <view class="order-no">订单号: {{orderNo}}</view>
+    </view>
+  </view>
+
+  <!-- 评分 -->
+  <view class="rating-section">
+    <view class="section-title">评分</view>
+    <view class="stars-wrapper">
+      <view class="rating-stars">
+        <text
+          class="star {{index <= rating - 1 ? 'filled' : ''}}"
+          wx:for="{{[1,2,3,4,5]}}"
+          wx:key="*"
+          bindtap="selectRating"
+          data-rating="{{item}}"
+        >★</text>
+      </view>
+      <text class="rating-text">{{ratingTexts[rating - 1] || '请评分'}}</text>
+    </view>
+  </view>
+
+  <!-- 评价内容 -->
+  <view class="content-section">
+    <view class="section-title">评价内容</view>
+    <textarea
+      class="content-input"
+      placeholder="分享您的体验，帮助更多人了解这个产品"
+      value="{{content}}"
+      bindinput="onContentInput"
+      maxlength="500"
+      show-confirm-bar="{{false}}"
+      auto-height
+    ></textarea>
+    <view class="char-count">{{content.length}}/500</view>
+  </view>
+
+  <!-- 上传图片 -->
+  <view class="images-section">
+    <view class="section-title">上传图片（选填）</view>
+    <view class="images-grid">
+      <view class="image-item" wx:for="{{images}}" wx:key="*">
+        <image class="uploaded-image" src="{{item}}" mode="aspectFill"></image>
+        <view class="delete-btn" catchtap="deleteImage" data-index="{{index}}">×</view>
+      </view>
+      <view class="upload-btn" wx:if="{{images.length < 9}}" bindtap="chooseImage">
+        <text class="upload-icon">+</text>
+        <text class="upload-text">添加图片</text>
+      </view>
+    </view>
+    <view class="image-tip">最多上传9张图片</view>
+  </view>
+
+  <!-- 匿名选项 -->
+  <view class="anonymous-section">
+    <view class="anonymous-label">匿名评价</view>
+    <switch
+      class="anonymous-switch"
+      checked="{{isAnonymous}}"
+      bindchange="onAnonymousChange"
+      color="#1890ff"
+    />
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-section">
+    <button
+      class="submit-btn"
+      bindtap="submitReview"
+      disabled="{{submitting}}"
+    >
+      {{submitting ? '提交中...' : '提交评价'}}
+    </button>
+  </view>
+</view>
