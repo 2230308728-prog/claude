@@ -11,9 +11,10 @@ import { RefundsModule } from './modules/refunds/refunds.module';
 import { UsersModule } from './modules/users/users.module';
 import { CouponsModule } from './modules/coupons/coupons.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
+import { BannersModule } from './modules/banners/banners.module';
 
 @Module({
-  imports: [PrismaModule, CacheModule, OssModule, AuthModule, ProductsModule, OrdersModule, RefundsModule, UsersModule, CouponsModule, ReviewsModule],
+  imports: [PrismaModule, CacheModule, OssModule, AuthModule, ProductsModule, OrdersModule, RefundsModule, UsersModule, CouponsModule, ReviewsModule, BannersModule],
   controllers: [AppController],
   providers: [AppService],
 })

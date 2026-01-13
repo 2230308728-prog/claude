@@ -132,6 +132,7 @@ model ProductCategory {
 
   // 关联关系
   products Product[] @relation("CategoryProducts")
+  banners  Banner[]   @relation("BannerCategories")
 
   @@map("product_categories")
 }
@@ -161,6 +162,7 @@ model Product {
   category ProductCategory @relation("CategoryProducts", fields: [categoryId], references: [id])
   orders   Order[]          @relation("ProductOrders")
   reviews  Review[]         @relation("ProductReviews")
+  banners  Banner[]         @relation("BannerProducts")
 
   @@index([categoryId])
   @@index([status])
@@ -354,4 +356,30 @@ model Review {
   @@index([status])
   @@index([rating])
   @@map("reviews")
+}
+
+// 11. 轮播图表 (banners)
+model Banner {
+  id          Int      @id @default(autoincrement())
+  title       String   @map("title")
+  imageUrl    String   @map("image_url")
+  linkUrl     String?  @map("link_url")
+  linkType    String   @default("none") @map("link_type") // none, product, category, url, mini_program
+  productId   Int?     @map("product_id")
+  categoryId  Int?     @map("category_id")
+  sortOrder   Int      @default(0) @map("sort_order") // 排序，数字越小越靠前
+  isEnabled   Boolean  @default(true) @map("is_enabled")
+  startDate   DateTime? @map("start_date") // 开始展示时间
+  endDate     DateTime? @map("end_date") // 结束展示时间
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  product  Product?        @relation("BannerProducts", fields: [productId], references: [id])
+  category ProductCategory? @relation("BannerCategories", fields: [categoryId], references: [id])
+
+  @@index([isEnabled])
+  @@index([sortOrder])
+  @@index([startDate, endDate])
+  @@map("banners")
 }

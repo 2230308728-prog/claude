@@ -344,3 +344,64 @@ export interface ReviewStats {
   };
 }
 
+// Banner types
+export type BannerLinkType = 'none' | 'product' | 'category' | 'url' | 'mini_program';
+
+export interface Banner {
+  id: number;
+  title: string;
+  imageUrl: string;
+  linkUrl: string | null;
+  linkType: BannerLinkType;
+  productId: number | null;
+  categoryId: number | null;
+  sortOrder: number;
+  isEnabled: boolean;
+  startDate: string | null;
+  endDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+  product?: {
+    id: number;
+    title: string;
+    images: string[];
+  } | null;
+  category?: {
+    id: number;
+    name: string;
+  } | null;
+}
+
+export interface CreateBannerDto {
+  title: string;
+  imageUrl: string;
+  linkUrl?: string;
+  linkType: BannerLinkType;
+  productId?: number;
+  categoryId?: number;
+  sortOrder?: number;
+  isEnabled?: boolean;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface UpdateBannerDto {
+  title?: string;
+  imageUrl?: string;
+  linkUrl?: string;
+  linkType?: BannerLinkType;
+  productId?: number;
+  categoryId?: number;
+  sortOrder?: number;
+  isEnabled?: boolean;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface BannerQuery {
+  page?: number;
+  pageSize?: number;
+  isEnabled?: boolean;
+  keyword?: string;
+}
+
