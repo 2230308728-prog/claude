@@ -1,0 +1,42 @@
+<!--pages/coupon-select/coupon-select.wxml-->
+<view class="container">
+  <view class="coupon-list" wx:if="{{coupons.length > 0}}">
+    <view
+      class="coupon-item {{selectedCouponId === item.coupon.id ? 'selected' : ''}}"
+      wx:for="{{coupons}}"
+      wx:key="id"
+      bindtap="selectCoupon"
+      data-coupon="{{item}}"
+    >
+      <view class="coupon-left">
+        <view class="coupon-amount">
+          <text class="amount-symbol" wx:if="{{item.coupon.type === 'AMOUNT'}}">¥</text>
+          <text class="amount-value">{{item.coupon.type === 'PERCENT' ? item.coupon.value : item.coupon.value}}</text>
+          <text class="amount-unit" wx:if="{{item.coupon.type === 'PERCENT'}}">折</text>
+        </view>
+        <view class="coupon-condition" wx:if="{{item.coupon.minAmount}}">
+          满{{item.coupon.minAmount}}元可用
+        </view>
+        <view class="coupon-condition" wx:else>无门槛</view>
+      </view>
+      <view class="coupon-right">
+        <view class="coupon-name">{{item.coupon.name}}</view>
+        <view class="coupon-desc" wx:if="{{item.coupon.description}}">{{item.coupon.description}}</view>
+        <view class="coupon-time">有效期至 {{item.expiresText}}</view>
+      </view>
+      <view class="coupon-check" wx:if="{{selectedCouponId === item.coupon.id}}">
+        <text class="check-icon">✓</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-container" wx:else>
+    <image class="empty-icon" src="/images/icon_empty.png" mode="aspectFit"></image>
+    <text class="empty-text">暂无可用优惠券</text>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar" wx:if="{{coupons.length > 0}}">
+    <button class="btn-confirm" bindtap="confirmSelection">确认</button>
+  </view>
+</view>

@@ -10,6 +10,9 @@ Page({
     submitting: false,
     agreed: false,
     minDate: '',
+    selectedCoupon: null,
+    discount: 0,
+    finalAmount: 0,
     formData: {
       participantName: '',
       participantAge: '',
@@ -38,6 +41,19 @@ Page({
     this.initMinDate();
     this.loadProduct();
     this.initUserInfo();
+  },
+
+  onShow() {
+    // 检查是否从优惠券选择页面返回
+    const selectedCoupon = getApp().globalData.selectedCoupon;
+    if (selectedCoupon) {
+      this.setData({
+        selectedCoupon: selectedCoupon
+      });
+      this.calculateDiscount();
+      // 清除全局数据
+      getApp().globalData.selectedCoupon = null;
+    }
   },
 
   // 初始化最小日期（今天）
@@ -75,6 +91,7 @@ Page({
 
       this.setData({
         product: res.data,
+        finalAmount: res.data.price,
         loading: false
       });
     } catch (error) {
@@ -86,6 +103,48 @@ Page({
       setTimeout(() => {
         wx.navigateBack();
       }, 1500);
+    }
+  },
+
+  // 选择优惠券
+  selectCoupon() {
+    wx.navigateTo({
+      url: `/pages/coupon-select/coupon-select?productId=${this.data.productId}&amount=${this.data.finalAmount || this.data.product.price}`
+    });
+  },
+
+  // 清除优惠券
+  clearCoupon() {
+    this.setData({
+      selectedCoupon: null,
+      discount: 0,
+      finalAmount: this.data.product.price
+    });
+  },
+
+  // 计算折扣
+  async calculateDiscount() {
+    if (!this.data.selectedCoupon || !this.data.product) {
+      return;
+    }
+
+    try {
+      const res = await request.post('/coupons/validate', {
+        couponId: this.data.selectedCoupon.id,
+        orderAmount: this.data.product.price,
+        productId: this.data.productId
+      });
+
+      this.setData({
+        discount: res.data.discount,
+        finalAmount: res.data.newTotal
+      });
+    } catch (error) {
+      wx.showToast({
+        title: error.message || '优惠券不可用',
+        icon: 'none'
+      });
+      this.clearCoupon();
     }
   },
 
@@ -227,7 +286,8 @@ Page({
         contactName: this.data.formData.contactName,
         contactPhone: this.data.formData.contactPhone,
         travelDate: this.data.formData.travelDate,
-        remarks: this.data.formData.remarks || undefined
+        remarks: this.data.formData.remarks || undefined,
+        couponId: this.data.selectedCoupon?.id
       };
 
       const res = await request.post('/orders', orderData);

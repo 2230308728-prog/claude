@@ -107,6 +107,34 @@
     </view>
   </view>
 
+  <!-- 优惠券 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">优惠券</text>
+    </view>
+    <view class="coupon-section">
+      <view wx:if="{{selectedCoupon}}" class="coupon-selected">
+        <view class="coupon-info">
+          <text class="coupon-name">{{selectedCoupon.name}}</text>
+          <text class="coupon-desc" wx:if="{{selectedCoupon.type === 'PERCENT'}}">
+            {{selectedCoupon.value}}%折扣
+          </text>
+          <text class="coupon-desc" wx:else>
+            ¥{{selectedCoupon.value}}
+          </text>
+        </view>
+        <view class="coupon-actions">
+          <text class="coupon-discount">-¥{{discount}}</text>
+          <text class="btn-clear" bindtap="clearCoupon">清除</text>
+        </view>
+      </view>
+      <view wx:else class="coupon-empty" bindtap="selectCoupon">
+        <text class="coupon-hint">{{discount > 0 ? discount + '个可用优惠券' : '暂无可用优惠券'}}</text>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+  </view>
+
   <!-- 备注 -->
   <view class="card">
     <view class="card-header">
@@ -140,9 +168,13 @@
         <text class="cost-label">数量</text>
         <text class="cost-value">1份</text>
       </view>
+      <view class="cost-row" wx:if="{{discount > 0}}">
+        <text class="cost-label discount-label">优惠券抵扣</text>
+        <text class="cost-value discount-value">-¥{{discount}}</text>
+      </view>
       <view class="cost-row total">
         <text class="cost-label">合计</text>
-        <text class="cost-value total-price">¥{{product.price}}</text>
+        <text class="cost-value total-price">¥{{finalAmount}}</text>
       </view>
     </view>
   </view>
@@ -162,7 +194,7 @@
   <view class="bottom-bar">
     <view class="price-info">
       <text class="price-label">合计：</text>
-      <text class="price-value">¥{{product.price}}</text>
+      <text class="price-value">¥{{finalAmount}}</text>
     </view>
     <button
       class="btn-submit"

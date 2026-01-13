@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CacheService } from '../../common/cache/cache.service';
 import { ProductsService } from '../products/products.service';
+import { CouponsService } from '../coupons/coupons.service';
 import { OrderStatus } from '@prisma/client';
 import {
   CreateOrderDto,
@@ -52,6 +53,7 @@ export class OrdersService {
     private readonly prisma: PrismaService,
     private readonly cache: CacheService,
     private readonly productsService: ProductsService,
+    private readonly couponsService: CouponsService,
   ) {}
 
   // ============================================
@@ -93,39 +95,87 @@ export class OrdersService {
 
     // 计算总金额
     const participantCount = dto.participantCount || 1;
-    const totalAmount = (Number(product.price) * participantCount).toFixed(2);
+    let totalAmount = Number(product.price) * participantCount;
+    let discount = 0;
+    let couponData = null;
+
+    // 如果提供了优惠券ID，验证并计算折扣
+    if (dto.couponId) {
+      try {
+        const validationResult = await this.couponsService.validateCoupon(
+          userId,
+          dto.couponId,
+          totalAmount,
+          dto.productId,
+        );
+        discount = validationResult.discount;
+        totalAmount = validationResult.newTotal;
+        couponData = validationResult.coupon;
+      } catch (error) {
+        throw new BadRequestException(error.message);
+      }
+    }
 
     // 创建订单
-    const order = await this.prisma.order.create({
-      data: {
-        orderNo,
-        userId,
-        productId: dto.productId,
-        status: OrderStatus.PENDING,
-        totalAmount,
-        paidAmount: '0.00',
-        childName: dto.childName,
-        childAge: dto.childAge,
-        contactPhone: dto.contactPhone,
-        contactName: dto.contactName,
-        bookingDate: new Date(dto.bookingDate),
-        participantCount,
-        remark: dto.remark,
-      },
-      include: {
-        product: {
-          select: {
-            id: true,
-            title: true,
-            price: true,
-            duration: true,
-            location: true,
+    const order = await this.prisma.$transaction(async (tx) => {
+      const order = await tx.order.create({
+        data: {
+          orderNo,
+          userId,
+          productId: dto.productId,
+          status: OrderStatus.PENDING,
+          totalAmount: totalAmount.toFixed(2),
+          paidAmount: '0.00',
+          childName: dto.childName,
+          childAge: dto.childAge,
+          contactPhone: dto.contactPhone,
+          contactName: dto.contactName,
+          bookingDate: new Date(dto.bookingDate),
+          participantCount,
+          remark: dto.remark,
+        },
+        include: {
+          product: {
+            select: {
+              id: true,
+              title: true,
+              price: true,
+              duration: true,
+              location: true,
+            },
           },
         },
-      },
+      });
+
+      // 如果使用了优惠券，创建订单优惠券关联记录
+      if (dto.couponId && discount > 0) {
+        await tx.orderCoupon.create({
+          data: {
+            orderId: order.id,
+            couponId: dto.couponId,
+            discount,
+          },
+        });
+
+        // 标记优惠券为已使用
+        await tx.userCoupon.update({
+          where: {
+            userId_couponId: {
+              userId,
+              couponId: dto.couponId,
+            },
+          },
+          data: {
+            status: 'USED',
+            usedAt: new Date(),
+          },
+        });
+      }
+
+      return order;
     });
 
-    this.logger.log(`Order created: ${orderNo} for user ${userId}`);
+    this.logger.log(`Order created: ${orderNo} for user ${userId} with discount: ${discount}`);
     return order;
   }
 

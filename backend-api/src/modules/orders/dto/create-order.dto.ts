@@ -78,4 +78,13 @@ export class CreateOrderDto {
   @IsOptional()
   @MaxLength(500)
   remark?: string;
+
+  @ApiProperty({
+    description: '优惠券ID',
+    example: 1,
+    required: false,
+  })
+  @IsInt()
+  @IsOptional()
+  couponId?: number;
 }

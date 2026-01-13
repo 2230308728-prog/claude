@@ -6,6 +6,7 @@
     "pages/favorites/favorites",
     "pages/addresses/addresses",
     "pages/order-confirm/order-confirm",
+    "pages/coupon-select/coupon-select",
     "pages/orders/orders",
     "pages/order/order",
     "pages/refund/refund",

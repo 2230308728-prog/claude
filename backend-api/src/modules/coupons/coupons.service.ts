@@ -293,6 +293,77 @@ export class CouponsService {
   }
 
   /**
+   * 验证优惠券并计算折扣（用于订单创建前预览）
+   */
+  async validateCoupon(userId: number, couponId: number, orderAmount: number, productId: number) {
+    const userCoupon = await this.prisma.userCoupon.findUnique({
+      where: {
+        userId_couponId: {
+          userId,
+          couponId,
+        },
+      },
+      include: {
+        coupon: true,
+      },
+    });
+
+    if (!userCoupon) {
+      throw new NotFoundException('优惠券不存在');
+    }
+
+    if (userCoupon.status !== 'AVAILABLE') {
+      throw new BadRequestException('优惠券不可用');
+    }
+
+    const coupon = userCoupon.coupon;
+    const now = new Date();
+
+    if (now > coupon.validUntil) {
+      throw new BadRequestException('优惠券已过期');
+    }
+
+    // 计算折扣金额
+    let discount = 0;
+
+    // 检查最低消费
+    if (coupon.minAmount && orderAmount < Number(coupon.minAmount)) {
+      throw new BadRequestException(
+        `订单金额需满${coupon.minAmount}元才能使用此优惠券`,
+      );
+    }
+
+    if (coupon.type === 'PERCENT') {
+      discount = (orderAmount * Number(coupon.value)) / 100;
+
+      // 检查最大优惠金额
+      if (coupon.maxDiscount && discount > Number(coupon.maxDiscount)) {
+        discount = Number(coupon.maxDiscount);
+      }
+    } else {
+      discount = Number(coupon.value);
+    }
+
+    // 优惠金额不能超过订单金额
+    if (discount > orderAmount) {
+      discount = orderAmount;
+    }
+
+    return {
+      discount,
+      newTotal: orderAmount - discount,
+      coupon: {
+        id: coupon.id,
+        name: coupon.name,
+        type: coupon.type,
+        value: coupon.value,
+        minAmount: coupon.minAmount,
+        maxDiscount: coupon.maxDiscount,
+      },
+    };
+  }
+
+  /**
    * 使用优惠券
    */
   async useCoupon(userId: number, couponId: number, orderId: number) {

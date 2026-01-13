@@ -58,6 +58,22 @@ export class CouponsController {
     return this.couponsService.claimCoupon(user.id, claimCouponDto.couponId);
   }
 
+  @Post('validate')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '验证优惠券并计算折扣' })
+  validateCoupon(
+    @CurrentUser() user: AuthUser,
+    @Body() body: { couponId: number; orderAmount: number; productId: number },
+  ) {
+    return this.couponsService.validateCoupon(
+      user.id,
+      body.couponId,
+      body.orderAmount,
+      body.productId,
+    );
+  }
+
   @Post('use')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
