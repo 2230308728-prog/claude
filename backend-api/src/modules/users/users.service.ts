@@ -26,26 +26,26 @@ export interface PaginatedResponse<T> {
 }
 
 /**
- * Dashboard 统计数据接口
+ * Dashboard 统计数据接口（扁平化结构，匹配前端需求）
  */
 export interface DashboardStats {
-  overview: {
-    totalUsers: number;
-    totalOrders: number;
-    totalRevenue: string;
-    totalProducts: number;
-  };
-  todayStats: {
-    newUsers: number;
-    newOrders: number;
-    revenue: string;
-  };
-  orderStats: {
-    pending: number;
-    paid: number;
-    cancelled: number;
-    refunded: number;
-  };
+  totalUsers: number;
+  totalProducts: number;
+  totalOrders: number;
+  totalRevenue: number;
+  todayOrders: number;
+  todayRevenue: number;
+  pendingOrders: number;
+  paidOrders: number;
+  completedOrders: number;
+  cancelledOrders: number;
+  lowStockProducts: number;
+}
+
+/**
+ * Dashboard 详情数据接口（包含recentOrders和topProducts）
+ */
+export interface DashboardDetail extends DashboardStats {
   recentOrders: any[];
   topProducts: any[];
 }
@@ -298,67 +298,37 @@ export class UsersService {
     ]);
 
     // 订单状态统计
-    const [pendingCount, paidCount, cancelledCount, refundedCount] = await Promise.all([
+    const [pendingCount, paidCount, completedCount, cancelledCount, refundedCount] = await Promise.all([
       this.prisma.order.count({ where: { status: OrderStatus.PENDING } }),
       this.prisma.order.count({ where: { status: OrderStatus.PAID } }),
+      this.prisma.order.count({ where: { status: OrderStatus.COMPLETED } }),
       this.prisma.order.count({ where: { status: OrderStatus.CANCELLED } }),
       this.prisma.order.count({ where: { status: OrderStatus.REFUNDED } }),
     ]);
 
-    // 最近订单
-    const recentOrders = await this.prisma.order.findMany({
-      take: 10,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        user: {
-          select: {
-            id: true,
-            nickname: true,
-            phone: true,
-          },
+    // 低库存产品统计
+    const lowStockProducts = await this.prisma.product.count({
+      where: {
+        stock: {
+          lte: 10,
         },
-        product: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
+        status: 'PUBLISHED',
       },
     });
 
-    // 热门产品
-    const topProducts = await this.prisma.product.findMany({
-      take: 5,
-      orderBy: { bookingCount: 'desc' },
-      include: {
-        category: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    });
-
+    // 返回扁平化的统计数据（前端期望的格式）
     const stats: DashboardStats = {
-      overview: {
-        totalUsers,
-        totalOrders,
-        totalRevenue: totalRevenue.toString(),
-        totalProducts,
-      },
-      todayStats: {
-        newUsers,
-        newOrders: newOrdersResult._count,
-        revenue: newOrdersResult._sum.paidAmount?.toString() || '0',
-      },
-      orderStats: {
-        pending: pendingCount,
-        paid: paidCount,
-        cancelled: cancelledCount,
-        refunded: refundedCount,
-      },
-      recentOrders,
-      topProducts,
+      totalUsers,
+      totalProducts,
+      totalOrders,
+      totalRevenue: Number(totalRevenue),
+      todayOrders: newOrdersResult._count,
+      todayRevenue: Number(newOrdersResult._sum.paidAmount || 0),
+      pendingOrders: pendingCount,
+      paidOrders: paidCount,
+      completedOrders: completedCount,
+      cancelledOrders: cancelledCount,
+      lowStockProducts,
     };
 
     // 缓存结果（5分钟）
